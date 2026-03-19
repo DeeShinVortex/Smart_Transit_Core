@@ -1,0 +1,30 @@
+.bus-marker {
+  background: none !important;
+  border: none !important;
+  transition: transform 0.5s ease;
+}
+
+.stop-marker {
+  background: none !important;
+  border: none !important;
+}
+
+.user-marker {
+  background: none !important;
+  border: none !important;
+}
+
+/* Hide default leaflet zoom control */
+.leaflet-control-zoom {
+  display: none !important;
+}
+
+/* Clean up leaflet popups */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.leaflet-popup-tip {
+  box-shadow: none;
+}
