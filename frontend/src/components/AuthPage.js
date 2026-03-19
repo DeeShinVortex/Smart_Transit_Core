@@ -1,6 +1,12 @@
 import React, { useState } from "react";
-import { FaBus } from "react-icons/fa";
+import { FaBus, FaMapMarkerAlt, FaClock, FaBell } from "react-icons/fa";
 import useAuthStore from "../hooks/useAuth";
+
+const features = [
+  { icon: FaMapMarkerAlt, text: "Real-time bus tracking", color: "text-blue-400" },
+  { icon: FaClock, text: "Live ETA to your stop", color: "text-emerald-400" },
+  { icon: FaBell, text: "Smart alerts & notifications", color: "text-amber-400" },
+];
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -24,18 +30,32 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1B2A4A] flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-b from-[#0F1B33] to-[#1B2A4A] flex flex-col items-center justify-center p-6">
       {/* Logo */}
-      <div className="mb-8 flex flex-col items-center">
-        <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-3">
-          <FaBus size={28} className="text-white" />
+      <div className="mb-6 flex flex-col items-center">
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg">
+          <FaBus size={26} className="text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-white">Transit Tracker</h1>
-        <p className="text-gray-400 text-sm mt-1">Track your bus in real time</p>
+        <h1 className="text-2xl font-bold text-white">OmniRoute</h1>
+        <p className="text-gray-400 text-sm mt-1">Vadodara Transit Tracker</p>
+      </div>
+
+      {/* Features */}
+      <div className="flex items-center gap-4 mb-6">
+        {features.map(({ icon: Icon, text, color }) => (
+          <div key={text} className="flex flex-col items-center gap-1.5">
+            <div className="w-10 h-10 bg-white bg-opacity-5 rounded-xl flex items-center justify-center">
+              <Icon size={16} className={color} />
+            </div>
+            <span className="text-[10px] text-gray-400 text-center leading-tight max-w-[70px]">
+              {text}
+            </span>
+          </div>
+        ))}
       </div>
 
       {/* Form card */}
-      <div className="bg-white/10 backdrop-blur rounded-2xl p-6 w-full max-w-sm">
+      <div className="bg-white bg-opacity-5 backdrop-blur-sm border border-white border-opacity-10 rounded-2xl p-6 w-full max-w-sm">
         <h2 className="text-white font-semibold text-lg mb-4 text-center">
           {isLogin ? "Welcome back" : "Create account"}
         </h2>
@@ -47,7 +67,7 @@ export default function AuthPage() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full bg-white/10 border border-white/20 text-white placeholder-gray-400 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-white bg-opacity-5 border border-white border-opacity-10 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
           />
 
           {!isLogin && (
@@ -57,7 +77,7 @@ export default function AuthPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-white/10 border border-white/20 text-white placeholder-gray-400 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-white bg-opacity-5 border border-white border-opacity-10 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
             />
           )}
 
@@ -67,12 +87,12 @@ export default function AuthPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength={8}
-            className="w-full bg-white/10 border border-white/20 text-white placeholder-gray-400 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            minLength={6}
+            className="w-full bg-white bg-opacity-5 border border-white border-opacity-10 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
           />
 
           {error && (
-            <div className="bg-red-500/20 text-red-300 text-xs rounded-xl p-3" role="alert">
+            <div className="bg-red-500 bg-opacity-10 border border-red-500 border-opacity-20 text-red-300 text-xs rounded-xl p-3" role="alert">
               {error}
             </div>
           )}
@@ -80,19 +100,23 @@ export default function AuthPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-600 disabled:opacity-50 transition-colors"
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-xl font-semibold text-sm hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 transition-all shadow-lg"
           >
             {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-400 mt-4">
+        <p className="text-center text-xs text-gray-500 mt-4">
           {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-          <button onClick={toggleMode} className="text-blue-400 font-semibold">
+          <button onClick={toggleMode} className="text-blue-400 font-semibold hover:text-blue-300 transition-colors">
             {isLogin ? "Sign up" : "Sign in"}
           </button>
         </p>
       </div>
+
+      <p className="text-[10px] text-gray-600 mt-6">
+        Demo: username <span className="text-gray-400">demo</span> / password <span className="text-gray-400">demo123</span>
+      </p>
     </div>
   );
 }

@@ -3,12 +3,22 @@ const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
 export async function fetchRoutes() {
   const res = await fetch(`${API_BASE}/transit/routes/`);
   const data = await res.json();
-  // Handle paginated response
   return Array.isArray(data) ? data : data.results || [];
 }
 
 export async function fetchStops(routeId) {
   const res = await fetch(`${API_BASE}/transit/routes/${routeId}/stops/`);
+  return res.json();
+}
+
+export async function fetchBuses() {
+  const res = await fetch(`${API_BASE}/transit/buses/`);
+  const data = await res.json();
+  return Array.isArray(data) ? data : data.results || [];
+}
+
+export async function fetchBusesLive() {
+  const res = await fetch(`${API_BASE}/transit/buses/live/`);
   return res.json();
 }
 

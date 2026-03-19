@@ -1,12 +1,22 @@
 .bus-marker {
   background: none !important;
   border: none !important;
-  transition: transform 0.5s ease;
+  transition: transform 0.3s ease;
+}
+
+.bus-marker:hover {
+  transform: scale(1.15);
+  z-index: 1000 !important;
 }
 
 .stop-marker {
   background: none !important;
   border: none !important;
+  transition: transform 0.2s ease;
+}
+
+.stop-marker:hover {
+  transform: scale(1.3);
 }
 
 .user-marker {
@@ -21,10 +31,21 @@
 
 /* Clean up leaflet popups */
 .leaflet-popup-content-wrapper {
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  padding: 2px;
+}
+
+.leaflet-popup-content {
+  margin: 10px 14px;
+  font-family: inherit;
 }
 
 .leaflet-popup-tip {
   box-shadow: none;
+}
+
+/* Smooth tile loading */
+.leaflet-tile {
+  transition: opacity 0.2s ease;
 }

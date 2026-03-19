@@ -26,10 +26,20 @@ class TripSerializer(serializers.ModelSerializer):
 
 class BusSerializer(serializers.ModelSerializer):
     current_trip = TripSerializer(read_only=True)
+    route_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Bus
-        fields = ["id", "bus_id", "label", "current_trip", "occupancy", "is_active"]
+        fields = [
+            "id", "bus_id", "label", "plate_number", "current_trip",
+            "occupancy", "is_active", "driver_name", "driver_phone",
+            "capacity", "route_name",
+        ]
+
+    def get_route_name(self, obj):
+        if obj.current_trip and obj.current_trip.route:
+            return obj.current_trip.route.name
+        return None
 
 
 class RouteSerializer(serializers.ModelSerializer):

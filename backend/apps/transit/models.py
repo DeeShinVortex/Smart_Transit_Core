@@ -69,6 +69,7 @@ class Bus(models.Model):
 
     bus_id = models.CharField(max_length=100, unique=True)
     label = models.CharField(max_length=50, help_text="e.g. Bus 42")
+    plate_number = models.CharField(max_length=20, blank=True, default="")
     current_trip = models.ForeignKey(
         Trip, on_delete=models.SET_NULL, null=True, blank=True, related_name="buses"
     )
@@ -76,6 +77,10 @@ class Bus(models.Model):
         max_length=10, choices=OCCUPANCY_CHOICES, default="empty"
     )
     is_active = models.BooleanField(default=True)
+    driver_name = models.CharField(max_length=100, blank=True, default="")
+    driver_phone = models.CharField(max_length=20, blank=True, default="")
+    driver_photo_url = models.URLField(blank=True, default="")
+    capacity = models.PositiveIntegerField(default=40)
 
     def __str__(self):
         return self.label

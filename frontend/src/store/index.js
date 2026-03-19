@@ -2,13 +2,15 @@ import { create } from "zustand";
 
 const useTrackingStore = create((set, get) => ({
   buses: {},
+  busDetails: [],
   routes: [],
   selectedBusId: null,
   selectedRoute: null,
-  trackingBusId: null, // bus we're actively following on the map
+  trackingBusId: null,
   eta: null,
 
   setBuses: (buses) => set({ buses }),
+  setBusDetails: (busDetails) => set({ busDetails }),
 
   updateBus: (id, location) =>
     set((state) => ({
@@ -23,7 +25,7 @@ const useTrackingStore = create((set, get) => ({
 
   setRoutes: (routes) => set({ routes }),
 
-  setSelectedBus: (bus) => set({ selectedBusId: bus?.vehicle_id || null }),
+  setSelectedBus: (bus) => set({ selectedBusId: bus?.vehicle_id || bus?.bus_id || null }),
 
   getSelectedBus: () => {
     const { selectedBusId, buses } = get();
@@ -31,7 +33,11 @@ const useTrackingStore = create((set, get) => ({
     return buses[selectedBusId] || null;
   },
 
-  // Start tracking — select + follow
+  getBusDetail: (busId) => {
+    const { busDetails } = get();
+    return busDetails.find((b) => b.bus_id === busId) || null;
+  },
+
   startTracking: (busId) =>
     set({ trackingBusId: busId, selectedBusId: busId }),
 

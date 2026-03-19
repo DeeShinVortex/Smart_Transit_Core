@@ -1,7 +1,7 @@
 """
 Bus simulator — moves buses along their route's actual road geometry.
-Posts updates to the GPS webhook so they flow through Daphne's
-channel layer to WebSocket clients (works with InMemoryChannelLayer).
+Posts updates to the GPS webhook so they flow through the Django server
+process (works with InMemoryChannelLayer, no Redis needed).
 
 Usage: python manage.py simulate_buses [--interval 3]
 """
@@ -9,7 +9,8 @@ Usage: python manage.py simulate_buses [--interval 3]
 import time
 import random
 import math
-import requests
+import urllib.request
+import json
 from django.core.management.base import BaseCommand
 
 from apps.transit.models import Bus
@@ -35,7 +36,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         interval = options["interval"]
-        channel_layer = get_channel_layer()
 
         buses = Bus.objects.filter(
             is_active=True, current_trip__isnull=False
@@ -57,7 +57,6 @@ class Command(BaseCommand):
                 self.stderr.write(f"  {bus.label}: no GeoJSON, skipping")
                 continue
 
-            # GeoJSON coords are [lon, lat], convert to (lat, lon)
             coords = geojson["coordinates"]
             waypoints = [(c[1], c[0]) for c in coords]
 
@@ -91,7 +90,6 @@ class Command(BaseCommand):
                     idx = state["index"]
                     lat, lon = wp[idx]
 
-                    # Heading to next point
                     nxt = idx + (1 if state["forward"] else -1)
                     nxt = max(0, min(nxt, len(wp) - 1))
                     hdg = bearing(lat, lon, wp[nxt][0], wp[nxt][1])
@@ -108,27 +106,25 @@ class Command(BaseCommand):
                         "occupancy": occ,
                     }
 
-                    VehicleLocation.objects.create(
-                        vehicle_id=bus.bus_id,
-                        latitude=data["latitude"],
-                        longitude=data["longitude"],
-                        speed=data["speed"],
-                        heading=data["heading"],
-                    )
-                    set_bus_location(bus.bus_id, data)
-                    Bus.objects.filter(pk=bus.pk).update(occupancy=occ)
-
-                    async_to_sync(channel_layer.group_send)(
-                        "tracking",
-                        {"type": "tracking.update", "data": data},
-                    )
+                    # POST to the GPS webhook — this writes to DB, cache,
+                    # and broadcasts via WebSocket all in the server process
+                    try:
+                        payload = json.dumps(data).encode("utf-8")
+                        req = urllib.request.Request(
+                            API_URL,
+                            data=payload,
+                            headers={"Content-Type": "application/json"},
+                            method="POST",
+                        )
+                        urllib.request.urlopen(req, timeout=5)
+                    except Exception as e:
+                        self.stderr.write(f"  POST failed for {bus.label}: {e}")
 
                     self.stdout.write(
                         f"  {bus.label}: ({data['latitude']}, {data['longitude']}) "
                         f"{data['speed']}km/h {occ}"
                     )
 
-                    # Advance along road, bounce at ends
                     if state["forward"]:
                         state["index"] += 1
                         if state["index"] >= len(wp) - 1:

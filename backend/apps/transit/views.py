@@ -38,3 +38,22 @@ class BusViewSet(viewsets.ReadOnlyModelViewSet):
         "current_trip__route"
     )
     serializer_class = BusSerializer
+
+    @action(detail=False, methods=["get"])
+    def live(self, request):
+        """All active buses with merged live location data."""
+        from services.cache import get_all_bus_locations
+
+        buses = self.get_queryset()
+        locations = get_all_bus_locations()
+        result = []
+        for bus in buses:
+            data = BusSerializer(bus).data
+            loc = locations.get(bus.bus_id, {})
+            data["latitude"] = loc.get("latitude")
+            data["longitude"] = loc.get("longitude")
+            data["speed"] = loc.get("speed", 0)
+            data["heading"] = loc.get("heading", 0)
+            data["live_occupancy"] = loc.get("occupancy", bus.occupancy)
+            result.append(data)
+        return Response(result)

@@ -4,6 +4,9 @@ Django settings for core project.
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -69,13 +72,15 @@ DATABASES = {
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
         "HOST": os.environ.get("DB_HOST", "db"),
         "PORT": os.environ.get("DB_PORT", "5432"),
+        "OPTIONS": {
+            "sslmode": os.environ.get("DB_SSLMODE", "prefer"),
+        },
     }
 }
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [os.environ.get("REDIS_URL", "redis://redis:6379/0")]},
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
     }
 }
 

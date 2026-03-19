@@ -17,6 +17,15 @@ DEMO_STOPS = [
     {"stop_id": "S8", "name": "Karelibaug", "lat": 22.3250, "lon": 73.2050},
 ]
 
+PARUL_AIRPORT_STOPS = [
+    {"stop_id": "S9",  "name": "Parul University",      "lat": 22.2888, "lon": 73.3636},
+    {"stop_id": "S10", "name": "Waghodia",               "lat": 22.2950, "lon": 73.3400},
+    {"stop_id": "S11", "name": "Vasad Road",             "lat": 22.3000, "lon": 73.3100},
+    {"stop_id": "S12", "name": "Karelibaug Crossing",    "lat": 22.3180, "lon": 73.2100},
+    {"stop_id": "S13", "name": "Sayajigunj Bus Stand",   "lat": 22.3145, "lon": 73.1870},
+    {"stop_id": "S14", "name": "Vadodara Airport",       "lat": 22.3362, "lon": 73.2263},
+]
+
 
 class Command(BaseCommand):
     help = "Seed demo transit data for Vadodara with road-following routes"
@@ -120,6 +129,60 @@ class Command(BaseCommand):
             bus_id="BUS-13", defaults={"label": "Bus 13", "current_trip": t1, "occupancy": "crowded"}
         )
 
+        # Route 3: Parul University - Airport Express
+        time.sleep(1)
+        parul_stops = {}
+        for s in PARUL_AIRPORT_STOPS:
+            obj, _ = Stop.objects.update_or_create(
+                stop_id=s["stop_id"],
+                defaults={"name": s["name"], "latitude": s["lat"], "longitude": s["lon"]},
+            )
+            parul_stops[s["stop_id"]] = obj
+
+        r3_coords = [(s["lat"], s["lon"]) for s in PARUL_AIRPORT_STOPS]
+        self.stdout.write("  Fetching road route for Parul University - Airport Express...")
+        r3_geojson = get_road_route(r3_coords)
+        if not r3_geojson:
+            self.stdout.write(self.style.WARNING("  OSRM failed, using straight lines"))
+            r3_geojson = {
+                "type": "LineString",
+                "coordinates": [[s["lon"], s["lat"]] for s in PARUL_AIRPORT_STOPS],
+            }
+
+        r3, _ = Route.objects.update_or_create(
+            route_id="R3",
+            defaults={
+                "name": "Parul University - Airport Express",
+                "description": "Parul University → Vadodara Airport via Waghodia, Karelibaug & Sayajigunj",
+                "color": "#10B981",
+                "geojson": r3_geojson,
+            },
+        )
+        for s in parul_stops.values():
+            r3.stops.add(s)
+
+        t3, _ = Trip.objects.update_or_create(
+            trip_id="T3", defaults={"route": r3, "direction": "outbound"}
+        )
+        for i, sid in enumerate(["S9", "S10", "S11", "S12", "S13", "S14"]):
+            hour = 7 + (i * 10) // 60
+            minute = (i * 10) % 60
+            TripStop.objects.update_or_create(
+                trip=t3, sequence=i + 1,
+                defaults={
+                    "stop": parul_stops[sid],
+                    "arrival_time": f"{hour:02d}:{minute:02d}:00",
+                    "departure_time": f"{hour:02d}:{minute + 1:02d}:00",
+                },
+            )
+
+        Bus.objects.update_or_create(
+            bus_id="BUS-55", defaults={"label": "Bus 55", "current_trip": t3, "occupancy": "empty"}
+        )
+        Bus.objects.update_or_create(
+            bus_id="BUS-88", defaults={"label": "Bus 88", "current_trip": t3, "occupancy": "half"}
+        )
+
         self.stdout.write(self.style.SUCCESS(
-            "Seeded: 2 Vadodara routes (road-following), 8 stops, 2 trips, 3 buses"
+            "Seeded: 3 Vadodara routes (road-following), 14 stops, 3 trips, 5 buses"
         ))

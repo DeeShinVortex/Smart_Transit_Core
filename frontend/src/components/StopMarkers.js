@@ -6,10 +6,17 @@ import { stopIcon } from "./BusIcon";
 export default function StopMarkers() {
   const routes = useTrackingStore((s) => s.routes) || [];
 
+  // Deduplicate stops and track which routes they belong to
   const stopsMap = {};
   routes.forEach((route) => {
     (route.stops || []).forEach((stop) => {
-      stopsMap[stop.stop_id] = stop;
+      if (!stopsMap[stop.stop_id]) {
+        stopsMap[stop.stop_id] = { ...stop, routes: [] };
+      }
+      stopsMap[stop.stop_id].routes.push({
+        name: route.name,
+        color: route.color,
+      });
     });
   });
 
@@ -22,7 +29,20 @@ export default function StopMarkers() {
           icon={stopIcon}
         >
           <Popup>
-            <strong>{stop.name}</strong>
+            <div className="min-w-[120px]">
+              <p className="font-bold text-sm text-gray-800">{stop.name}</p>
+              <div className="mt-1.5 space-y-1">
+                {stop.routes.map((r, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: r.color }}
+                    />
+                    <span className="text-[11px] text-gray-500">{r.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </Popup>
         </Marker>
       ))}
