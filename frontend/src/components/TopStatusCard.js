@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { IoLocationSharp } from "react-icons/io5";
 import { FaBus } from "react-icons/fa";
+import { motion } from "framer-motion";
 import useTrackingStore from "../store";
 import { fetchBusETA } from "../services/api";
 
@@ -13,7 +14,7 @@ function ProgressDots({ progress }) {
         <div
           key={i}
           className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-            i < filled ? "bg-emerald-400" : "bg-white bg-opacity-20"
+            i < filled ? "bg-ios-green" : "bg-ios-gray5"
           }`}
         />
       ))}
@@ -55,115 +56,104 @@ export default function TopStatusCard() {
 
   const occupancyLabel = { empty: "Available", half: "Moderate", crowded: "Crowded" };
   const occupancyColor = {
-    empty: "bg-emerald-500 bg-opacity-90",
-    half: "bg-amber-500 bg-opacity-90",
-    crowded: "bg-red-500 bg-opacity-90",
+    empty: "bg-ios-green text-white",
+    half: "bg-ios-orange text-white",
+    crowded: "bg-ios-red text-white",
   };
 
   return (
-    <div className="absolute top-0 left-0 right-0 z-10 p-4 safe-top">
-      <div className="flex items-center justify-between mb-3">
+    <motion.div 
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      className="absolute top-0 left-0 right-0 z-10 p-4 safe-top"
+    >
+      <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-            <FaBus size={14} className="text-white" />
+          <div className="w-8 h-8 bg-ios-blue text-white rounded-xl shadow-glass flex items-center justify-center">
+            <FaBus size={14} />
           </div>
-          <span className="text-sm font-bold text-gray-800">OmniRoute</span>
+          <span className="text-sm font-bold text-gray-900 tracking-tight">OmniRoute</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-xs text-gray-500 font-medium">
-            {Object.keys(buses).length} buses live
+        <div className="flex items-center gap-1.5 bg-white/60 backdrop-blur-md px-2.5 py-1 rounded-full shadow-sm border border-white/50">
+          <span className="w-2 h-2 rounded-full bg-ios-green animate-pulse" />
+          <span className="text-xs text-ios-gray font-semibold">
+            {Object.keys(buses).length} live
           </span>
         </div>
       </div>
 
       {activeBus ? (
-        <div className="bg-[#1B2A4A] rounded-2xl p-4 shadow-xl">
+        <motion.div 
+          layout
+          className="bg-white/80 backdrop-blur-ios border border-white/60 rounded-3xl p-5 shadow-ios"
+        >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center"
+                className="w-12 h-12 rounded-xl flex items-center justify-center shadow-glass-sm"
                 style={{
                   backgroundColor: routeInfo?.color
-                    ? routeInfo.color + "30"
-                    : "#FFD43B30",
+                    ? routeInfo.color + "20"
+                    : "#007AFF20",
                 }}
               >
                 <FaBus
-                  size={18}
-                  style={{ color: routeInfo?.color || "#FFD43B" }}
+                  size={20}
+                  style={{ color: routeInfo?.color || "#007AFF" }}
                 />
               </div>
               <div>
-                <p className="text-white font-bold text-sm">
+                <p className="text-gray-900 font-bold text-base tracking-tight">
                   {detail?.label || activeBus.vehicle_id}
                   {detail?.plate_number && (
-                    <span className="text-gray-400 font-normal text-xs ml-1.5">
+                    <span className="text-ios-gray font-medium text-xs ml-1.5">
                       {detail.plate_number}
                     </span>
                   )}
                 </p>
-                <p className="text-gray-400 text-xs mt-0.5">
+                <p className="text-ios-gray text-xs mt-0.5 font-medium">
                   {routeInfo?.name || "En route"}
                 </p>
               </div>
             </div>
             <span
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold text-white ${
-                occupancyColor[activeBus.occupancy] || "bg-emerald-500 bg-opacity-90"
+              className={`px-3 py-1.5 rounded-xl text-[10px] uppercase tracking-wider font-bold shadow-sm ${
+                occupancyColor[activeBus.occupancy] || "bg-ios-green text-white"
               }`}
             >
               {occupancyLabel[activeBus.occupancy] || "Active"}
             </span>
           </div>
 
-          <ProgressDots progress={progress} />
+          <div className="mt-4">
+            <ProgressDots progress={progress} />
+          </div>
 
-          <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2">
-              <span className="bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg">
+              <span className="bg-ios-green/10 text-ios-green text-sm font-bold px-3 py-1 rounded-xl border border-ios-green/20">
                 {etaMin} min
               </span>
               {eta?.next_stop?.stop_name && (
-                <span className="flex items-center gap-1 text-gray-400 text-xs">
-                  <IoLocationSharp size={11} />
-                  {eta.next_stop.stop_name}
+                <span className="flex items-center gap-1 text-ios-gray font-medium text-xs bg-ios-gray6 px-2.5 py-1 rounded-lg">
+                  <IoLocationSharp size={12} className="text-ios-gray2" />
+                  <span className="truncate max-w-[120px]">{eta.next_stop.stop_name}</span>
                 </span>
               )}
             </div>
-            <span className="text-gray-500 text-xs">
+            <span className="text-ios-gray font-semibold text-xs tracking-tight bg-ios-gray6 px-2.5 py-1 rounded-lg">
               {Math.round(activeBus.speed || 0)} km/h
             </span>
           </div>
-
-          {detail?.driver_name && (
-            <div className="mt-3 pt-3 border-t border-white border-opacity-10 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-blue-500 bg-opacity-30 flex items-center justify-center">
-                  <span className="text-xs text-blue-300 font-bold">
-                    {detail.driver_name.charAt(0)}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-white text-xs font-medium">
-                    {detail.driver_name}
-                  </p>
-                  <p className="text-gray-500 text-[10px]">Driver</p>
-                </div>
-              </div>
-              <span className="text-gray-500 text-[10px]">
-                {detail.capacity} seats
-              </span>
-            </div>
-          )}
-        </div>
+        </motion.div>
       ) : (
-        <div className="bg-[#1B2A4A] rounded-2xl p-5 shadow-xl">
-          <p className="text-gray-400 text-center text-sm">
+        <div className="bg-white/80 backdrop-blur-ios border border-white/60 rounded-3xl p-5 shadow-ios">
+          <p className="text-ios-gray font-medium text-center text-sm py-2">
             Waiting for bus data...
           </p>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

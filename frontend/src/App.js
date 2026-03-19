@@ -20,6 +20,7 @@ function TrackerApp() {
   const setRoutes = useTrackingStore((s) => s.setRoutes);
   const setBusDetails = useTrackingStore((s) => s.setBusDetails);
   const [activeTab, setActiveTab] = useState("mybus");
+  const isMapOnly = useTrackingStore((s) => s.isMapOnly);
 
   useEffect(() => {
     fetchRoutes().then(setRoutes).catch(() => {});
@@ -32,15 +33,21 @@ function TrackerApp() {
       {activeTab === "mybus" && (
         <>
           <MapView />
-          <TopStatusCard />
-          <BottomDriverCard />
+          {!isMapOnly && (
+            <>
+              <TopStatusCard />
+              <BottomDriverCard />
+            </>
+          )}
         </>
       )}
       {activeTab === "routes" && <RoutesPage />}
       {activeTab === "history" && <HistoryPage />}
       {activeTab === "messages" && <MessagesPage />}
       {activeTab === "profile" && <ProfilePage />}
-      <BottomTabBar activeTab={activeTab} onTabChange={setActiveTab} />
+      {(!isMapOnly || activeTab !== "mybus") && (
+        <BottomTabBar activeTab={activeTab} onTabChange={setActiveTab} />
+      )}
     </div>
   );
 }

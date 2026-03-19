@@ -14,7 +14,8 @@ import { busIcon, userIcon } from "./BusIcon";
 import SmoothMarker from "./SmoothMarker";
 import StopMarkers from "./StopMarkers";
 import FollowCamera from "./FollowCamera";
-import { FiPlus, FiMinus, FiCrosshair, FiNavigation } from "react-icons/fi";
+import { FiPlus, FiMinus, FiCrosshair, FiNavigation, FiMaximize, FiMinimize } from "react-icons/fi";
+import { motion } from "framer-motion";
 
 const DEFAULT_CENTER = [22.3072, 73.1812];
 
@@ -35,7 +36,7 @@ function UserLocation() {
   return (
     <Marker position={position} icon={userIcon}>
       <Popup>
-        <div className="text-center text-xs font-medium">You are here</div>
+        <div className="text-center text-xs font-semibold px-1 py-0.5">You are here</div>
       </Popup>
     </Marker>
   );
@@ -55,7 +56,7 @@ function BusMarkers() {
           ? routes.find((r) => r.id === detail.current_trip.route)
           : null;
 
-        const occColors = { empty: "#10B981", half: "#F59E0B", crowded: "#EF4444" };
+        const occColors = { empty: "#34C759", half: "#FF9500", crowded: "#FF3B30" };
         const occLabels = { empty: "Available", half: "Moderate", crowded: "Crowded" };
 
         return (
@@ -65,29 +66,29 @@ function BusMarkers() {
             icon={busIcon}
             onClick={() => setSelectedBus(bus)}
           >
-            <Popup>
-              <div className="min-w-[140px]">
-                <p className="font-bold text-sm text-gray-800">
+            <Popup className="ios-popup">
+              <div className="min-w-[150px] p-1">
+                <p className="font-bold text-base text-gray-900 tracking-tight">
                   {detail?.label || id}
                 </p>
                 {route && (
-                  <p className="text-xs mt-0.5" style={{ color: route.color }}>
+                  <p className="text-[11px] font-semibold mt-0.5" style={{ color: route.color }}>
                     {route.name}
                   </p>
                 )}
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs text-gray-500">
+                <div className="flex items-center justify-between mt-3 mb-1">
+                  <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">
                     {Math.round(bus.speed || 0)} km/h
                   </span>
                   <span
-                    className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full text-white"
-                    style={{ backgroundColor: occColors[bus.occupancy] || "#10B981" }}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-md text-white shadow-sm"
+                    style={{ backgroundColor: occColors[bus.occupancy] || "#34C759" }}
                   >
                     {occLabels[bus.occupancy] || bus.occupancy}
                   </span>
                 </div>
                 {detail?.driver_name && (
-                  <p className="text-[10px] text-gray-400 mt-1.5 pt-1.5 border-t border-gray-100">
+                  <p className="text-[10px] font-medium text-gray-500 mt-2 pt-2 border-t border-gray-100">
                     {detail.driver_name}
                     {detail.plate_number && ` · ${detail.plate_number}`}
                   </p>
@@ -112,9 +113,9 @@ function RouteLayers() {
             <GeoJSON
               data={route.geojson}
               style={{
-                color: route.color || "#2563EB",
-                weight: 10,
-                opacity: 0.12,
+                color: route.color || "#007AFF",
+                weight: 12,
+                opacity: 0.15,
                 lineCap: "round",
                 lineJoin: "round",
               }}
@@ -122,9 +123,9 @@ function RouteLayers() {
             <GeoJSON
               data={route.geojson}
               style={{
-                color: route.color || "#2563EB",
-                weight: 4,
-                opacity: 0.85,
+                color: route.color || "#007AFF",
+                weight: 5,
+                opacity: 0.9,
                 lineCap: "round",
                 lineJoin: "round",
               }}
@@ -137,57 +138,73 @@ function RouteLayers() {
 
 function MapControls() {
   const map = useMap();
+  const isMapOnly = useTrackingStore((s) => s.isMapOnly);
+  const toggleMapOnly = useTrackingStore((s) => s.toggleMapOnly);
 
   const goToMyLocation = () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        map.flyTo([pos.coords.latitude, pos.coords.longitude], 16, { duration: 1.2 });
+        map.flyTo([pos.coords.latitude, pos.coords.longitude], 16, { duration: 0.5 });
       },
-      () => {},
-      { enableHighAccuracy: true }
+      (err) => console.warn("Location error:", err),
+      { enableHighAccuracy: true, maximumAge: 10000 }
     );
   };
 
   return (
-    <div className="absolute right-3 z-[1000]" style={{ top: "50%" }}>
-      <div className="flex flex-col gap-1.5">
-        <button
-          onClick={() => map.zoomIn()}
-          className="w-10 h-10 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow-lg flex items-center justify-center text-gray-600 hover:bg-white active:bg-gray-100 transition-colors"
-          aria-label="Zoom in"
-        >
-          <FiPlus size={18} />
-        </button>
-        <button
-          onClick={() => map.zoomOut()}
-          className="w-10 h-10 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow-lg flex items-center justify-center text-gray-600 hover:bg-white active:bg-gray-100 transition-colors"
-          aria-label="Zoom out"
-        >
-          <FiMinus size={18} />
-        </button>
-        <button
-          onClick={() => map.flyTo(DEFAULT_CENTER, 13, { duration: 1 })}
-          className="w-10 h-10 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow-lg flex items-center justify-center text-gray-600 hover:bg-white active:bg-gray-100 transition-colors"
-          aria-label="Reset view"
-        >
-          <FiCrosshair size={18} />
-        </button>
-        <button
-          onClick={goToMyLocation}
-          className="w-10 h-10 bg-blue-500 rounded-xl shadow-lg flex items-center justify-center text-white hover:bg-blue-600 active:bg-blue-700 transition-colors"
-          aria-label="My location"
-        >
-          <FiNavigation size={18} />
-        </button>
+    <motion.div 
+      initial={{ x: 50, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      className={`absolute right-4 z-[1000] transition-all duration-300 ${isMapOnly ? "top-4" : "top-[45%]"}`}
+    >
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col bg-white/80 backdrop-blur-ios rounded-2xl shadow-ios border border-white/60 overflow-hidden">
+          <motion.button
+            whileTap={{ backgroundColor: "rgba(0,0,0,0.05)" }}
+            onClick={() => map.zoomIn()}
+            className="w-11 h-11 flex items-center justify-center text-ios-gray hover:text-gray-900 transition-colors border-b border-gray-200/50"
+            aria-label="Zoom in"
+          >
+            <FiPlus size={20} />
+          </motion.button>
+          <motion.button
+            whileTap={{ backgroundColor: "rgba(0,0,0,0.05)" }}
+            onClick={() => map.zoomOut()}
+            className="w-11 h-11 flex items-center justify-center text-ios-gray hover:text-gray-900 transition-colors"
+            aria-label="Zoom out"
+          >
+            <FiMinus size={20} />
+          </motion.button>
+        </div>
+        
+        <div className="flex flex-col bg-white/80 backdrop-blur-ios rounded-2xl shadow-ios border border-white/60 overflow-hidden mt-2">
+          <motion.button
+            whileTap={{ backgroundColor: "rgba(0,0,0,0.05)" }}
+            onClick={goToMyLocation}
+            className="w-11 h-11 flex items-center justify-center text-ios-blue hover:bg-ios-blue/5 transition-colors border-b border-gray-200/50"
+            aria-label="My location"
+          >
+            <FiCrosshair size={20} />
+          </motion.button>
+          <motion.button
+            whileTap={{ backgroundColor: "rgba(0,0,0,0.05)" }}
+            onClick={toggleMapOnly}
+            className="w-11 h-11 flex items-center justify-center text-gray-800 hover:bg-gray-100 transition-colors"
+            aria-label="Toggle Fullscreen Map"
+          >
+            {isMapOnly ? <FiMinimize size={20} /> : <FiMaximize size={20} />}
+          </motion.button>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 export default function MapView() {
   return (
-    <div className="absolute inset-0 z-0">
+    <div className="absolute inset-0 z-0 bg-ios-bg">
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={13}
@@ -195,7 +212,10 @@ export default function MapView() {
         zoomControl={false}
         attributionControl={false}
       >
-        <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
+        <TileLayer 
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" 
+          maxZoom={19}
+        />
         <RouteLayers />
         <StopMarkers />
         <BusMarkers />

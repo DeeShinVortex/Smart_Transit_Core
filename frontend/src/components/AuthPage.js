@@ -1,12 +1,30 @@
 import React, { useState } from "react";
 import { FaBus, FaMapMarkerAlt, FaClock, FaBell } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 import useAuthStore from "../hooks/useAuth";
 
 const features = [
-  { icon: FaMapMarkerAlt, text: "Real-time bus tracking", color: "text-blue-400" },
-  { icon: FaClock, text: "Live ETA to your stop", color: "text-emerald-400" },
-  { icon: FaBell, text: "Smart alerts & notifications", color: "text-amber-400" },
+  { icon: FaMapMarkerAlt, text: "Real-time tracking", color: "text-ios-blue", bg: "bg-ios-blue/10" },
+  { icon: FaClock, text: "Live ETA updates", color: "text-ios-green", bg: "bg-ios-green/10" },
+  { icon: FaBell, text: "Smart transit alerts", color: "text-ios-orange", bg: "bg-ios-orange/10" },
 ];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 },
+  },
+};
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -30,93 +48,140 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F1B33] to-[#1B2A4A] flex flex-col items-center justify-center p-6">
-      {/* Logo */}
-      <div className="mb-6 flex flex-col items-center">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg">
-          <FaBus size={26} className="text-white" />
-        </div>
-        <h1 className="text-2xl font-bold text-white">OmniRoute</h1>
-        <p className="text-gray-400 text-sm mt-1">Vadodara Transit Tracker</p>
-      </div>
+    <div className="min-h-screen bg-[#F2F2F7] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Decorative background blur elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-64 h-64 bg-ios-blue/20 rounded-full blur-[80px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-64 h-64 bg-ios-green/20 rounded-full blur-[80px]" />
 
-      {/* Features */}
-      <div className="flex items-center gap-4 mb-6">
-        {features.map(({ icon: Icon, text, color }) => (
-          <div key={text} className="flex flex-col items-center gap-1.5">
-            <div className="w-10 h-10 bg-white bg-opacity-5 rounded-xl flex items-center justify-center">
-              <Icon size={16} className={color} />
-            </div>
-            <span className="text-[10px] text-gray-400 text-center leading-tight max-w-[70px]">
-              {text}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Form card */}
-      <div className="bg-white bg-opacity-5 backdrop-blur-sm border border-white border-opacity-10 rounded-2xl p-6 w-full max-w-sm">
-        <h2 className="text-white font-semibold text-lg mb-4 text-center">
-          {isLogin ? "Welcome back" : "Create account"}
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            className="w-full bg-white bg-opacity-5 border border-white border-opacity-10 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-          />
-
-          {!isLogin && (
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full bg-white bg-opacity-5 border border-white border-opacity-10 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-            />
-          )}
-
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            className="w-full bg-white bg-opacity-5 border border-white border-opacity-10 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-          />
-
-          {error && (
-            <div className="bg-red-500 bg-opacity-10 border border-red-500 border-opacity-20 text-red-300 text-xs rounded-xl p-3" role="alert">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-xl font-semibold text-sm hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 transition-all shadow-lg"
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="w-full max-w-sm z-10 flex flex-col items-center"
+      >
+        {/* Logo */}
+        <motion.div variants={itemVariants} className="mb-8 flex flex-col items-center">
+          <motion.div 
+            whileHover={{ scale: 1.05, rotate: 5 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-20 h-20 bg-white rounded-[2rem] shadow-ios flex items-center justify-center mb-4 border border-white/60"
           >
-            {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
-          </button>
-        </form>
+            <FaBus size={32} className="text-ios-blue drop-shadow-sm" />
+          </motion.div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">OmniRoute</h1>
+          <p className="text-ios-gray font-medium text-sm mt-1 tracking-wide uppercase">Vadodara Transit</p>
+        </motion.div>
 
-        <p className="text-center text-xs text-gray-500 mt-4">
-          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-          <button onClick={toggleMode} className="text-blue-400 font-semibold hover:text-blue-300 transition-colors">
-            {isLogin ? "Sign up" : "Sign in"}
-          </button>
-        </p>
-      </div>
+        {/* Features */}
+        <motion.div variants={itemVariants} className="flex items-start justify-center gap-4 mb-8 w-full">
+          {features.map(({ icon: Icon, text, color, bg }) => (
+            <div key={text} className="flex flex-col items-center gap-2 flex-1">
+              <div className={`w-12 h-12 ${bg} rounded-2xl flex items-center justify-center shadow-sm`}>
+                <Icon size={20} className={color} />
+              </div>
+              <span className="text-[10px] text-ios-gray font-semibold text-center leading-tight">
+                {text}
+              </span>
+            </div>
+          ))}
+        </motion.div>
 
-      <p className="text-[10px] text-gray-600 mt-6">
-        Demo: username <span className="text-gray-400">demo</span> / password <span className="text-gray-400">demo123</span>
-      </p>
+        {/* Form card */}
+        <motion.div 
+          variants={itemVariants}
+          className="bg-white/70 backdrop-blur-ios border border-white/80 rounded-[2rem] p-6 w-full shadow-ios"
+        >
+          <div className="mb-6 text-center">
+            <h2 className="text-gray-900 font-bold text-xl tracking-tight">
+              {isLogin ? "Welcome Back" : "Create Account"}
+            </h2>
+            <p className="text-ios-gray text-xs mt-1 font-medium">
+              {isLogin ? "Sign in to track your ride" : "Get started with OmniRoute"}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="w-full bg-white/50 border border-ios-gray5 text-gray-900 placeholder-ios-gray2 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-ios-blue/50 focus:border-ios-blue/50 transition-all font-medium shadow-sm"
+              />
+            </div>
+
+            <AnimatePresence mode="popLayout">
+              {!isLogin && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ opacity: { duration: 0.2 } }}
+                >
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full bg-white/50 border border-ios-gray5 text-gray-900 placeholder-ios-gray2 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-ios-blue/50 focus:border-ios-blue/50 transition-all font-medium shadow-sm"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div>
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full bg-white/50 border border-ios-gray5 text-gray-900 placeholder-ios-gray2 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-ios-blue/50 focus:border-ios-blue/50 transition-all font-medium shadow-sm"
+              />
+            </div>
+
+            <AnimatePresence>
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-ios-red/10 border border-ios-red/20 text-ios-red font-medium text-xs rounded-xl p-3 text-center"
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={loading}
+              className="w-full bg-ios-blue text-white py-3.5 rounded-2xl font-bold text-sm tracking-wide disabled:opacity-50 transition-all shadow-md shadow-ios-blue/30 mt-2"
+            >
+              {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
+            </motion.button>
+          </form>
+
+          <p className="text-center text-xs text-ios-gray font-medium mt-6">
+            {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+            <button 
+              onClick={toggleMode} 
+              className="text-ios-blue font-bold px-2 py-1 rounded-lg hover:bg-ios-blue/10 transition-colors"
+            >
+              {isLogin ? "Sign Up" : "Sign In"}
+            </button>
+          </p>
+        </motion.div>
+
+        <motion.p variants={itemVariants} className="text-[11px] text-ios-gray font-medium mt-8 bg-black/5 px-3 py-1.5 rounded-full border border-black/5 backdrop-blur-sm">
+          Demo: <strong className="text-gray-700">demo</strong> / <strong className="text-gray-700">demo123</strong>
+        </motion.p>
+      </motion.div>
     </div>
   );
 }

@@ -8,6 +8,9 @@ const useTrackingStore = create((set, get) => ({
   selectedRoute: null,
   trackingBusId: null,
   eta: null,
+  isMapOnly: false,
+
+  toggleMapOnly: () => set((state) => ({ isMapOnly: !state.isMapOnly })),
 
   setBuses: (buses) => set({ buses }),
   setBusDetails: (busDetails) => set({ busDetails }),
