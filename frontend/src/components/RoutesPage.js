@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { FaBus, FaMapMarkerAlt, FaClock } from "react-icons/fa";
-import { IoChevronDown, IoChevronUp } from "react-icons/io5";
+import { IoChevronDown, IoChevronUp, IoCompass } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import useTrackingStore from "../store";
+import RouteFinder from "./RouteFinder";
 
 const listVariants = {
   hidden: { opacity: 0 },
@@ -167,6 +168,7 @@ export default function RoutesPage() {
   const routes = useTrackingStore((s) => s.routes) || [];
   const busDetails = useTrackingStore((s) => s.busDetails) || [];
   const buses = useTrackingStore((s) => s.buses);
+  const [view, setView] = useState("all"); // "all" | "find"
 
   return (
     <div className="h-full bg-ios-bg pt-10 pb-28 px-4 overflow-y-auto hide-scrollbar">
@@ -174,28 +176,66 @@ export default function RoutesPage() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 24 }}
-        className="mb-6 px-2"
+        className="mb-5 px-2"
       >
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Routes</h1>
         <p className="text-sm font-medium text-ios-gray mt-1">
           {routes.length} active routes · {Object.keys(buses).length} buses live
         </p>
+
+        {/* Toggle */}
+        <div className="flex mt-4 bg-white/60 backdrop-blur-ios rounded-2xl p-1 border border-white/50 shadow-sm">
+          {[
+            { id: "all", label: "All Routes" },
+            { id: "find", label: "Find Route" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setView(tab.id)}
+              className={`flex-1 py-2 rounded-xl text-xs font-bold tracking-tight transition-all ${
+                view === tab.id
+                  ? "bg-white text-ios-blue shadow-sm"
+                  : "text-ios-gray"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </motion.div>
-      <motion.div 
-        variants={listVariants}
-        initial="hidden"
-        animate="visible"
-        className="space-y-4"
-      >
-        {routes.map((route) => (
-          <RouteCard
-            key={route.id}
-            route={route}
-            busDetails={busDetails}
-            buses={buses}
-          />
-        ))}
-      </motion.div>
+
+      <AnimatePresence mode="wait">
+        {view === "find" ? (
+          <motion.div
+            key="find"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 26 }}
+          >
+            <RouteFinder />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="all"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 26 }}
+            variants={listVariants}
+            className="space-y-4"
+          >
+            {routes.map((route) => (
+              <RouteCard
+                key={route.id}
+                route={route}
+                busDetails={busDetails}
+                buses={buses}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

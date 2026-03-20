@@ -70,9 +70,7 @@ export default function TopStatusCard() {
     >
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-ios-blue text-white rounded-xl shadow-glass flex items-center justify-center">
-            <FaBus size={14} />
-          </div>
+          <img src="/logon.png" alt="OmniRoute" className="w-8 h-8 rounded-xl shadow-glass object-contain" />
           <span className="text-sm font-bold text-gray-900 tracking-tight">OmniRoute</span>
         </div>
         <div className="flex items-center gap-1.5 bg-white/60 backdrop-blur-md px-2.5 py-1 rounded-full shadow-sm border border-white/50">

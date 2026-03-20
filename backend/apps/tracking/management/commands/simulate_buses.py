@@ -33,9 +33,14 @@ class Command(BaseCommand):
             "--interval", type=float, default=3.0,
             help="Seconds between position updates (default: 3)",
         )
+        parser.add_argument(
+            "--step", type=int, default=5,
+            help="Waypoints to advance per tick (default: 5)",
+        )
 
     def handle(self, *args, **options):
         interval = options["interval"]
+        step = options["step"]
 
         buses = Bus.objects.filter(
             is_active=True, current_trip__isnull=False
@@ -65,8 +70,8 @@ class Command(BaseCommand):
 
             bus_paths[bus] = {
                 "waypoints": waypoints,
-                "index": 0,
-                "forward": True,
+                "index": random.randint(0, len(waypoints) - 1),
+                "forward": random.choice([True, False]),
             }
             self.stdout.write(
                 f"  {bus.label}: {len(waypoints)} road waypoints on {route.name}"
@@ -126,11 +131,11 @@ class Command(BaseCommand):
                     )
 
                     if state["forward"]:
-                        state["index"] += 1
+                        state["index"] = min(state["index"] + step, len(wp) - 1)
                         if state["index"] >= len(wp) - 1:
                             state["forward"] = False
                     else:
-                        state["index"] -= 1
+                        state["index"] = max(state["index"] - step, 0)
                         if state["index"] <= 0:
                             state["forward"] = True
 

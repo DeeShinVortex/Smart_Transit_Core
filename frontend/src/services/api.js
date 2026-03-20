@@ -37,6 +37,19 @@ export async function fetchNearbyBuses(stopId) {
   return res.json();
 }
 
+export async function fetchStopsList() {
+  const res = await fetch(`${API_BASE}/transit/stops/`);
+  const data = await res.json();
+  return Array.isArray(data) ? data : data.results || [];
+}
+
+export async function findRoutes(originId, destinationId) {
+  const res = await fetch(
+    `${API_BASE}/transit/routes/find/?origin=${originId}&destination=${destinationId}`
+  );
+  return res.json();
+}
+
 export async function toggleFavoriteRoute(routeId, token) {
   const res = await fetch(`${API_BASE}/accounts/favorites/${routeId}/`, {
     method: "POST",
