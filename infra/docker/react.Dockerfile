@@ -2,7 +2,7 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+RUN npm install --legacy-peer-deps
 COPY frontend/ .
 
 ARG REACT_APP_API_URL
